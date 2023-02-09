@@ -8,8 +8,9 @@ const expressLayout = require("express-ejs-layouts");
 const PORT = process.env.PORT || 8000;
 const mongoose = require("mongoose");
 const session = require("express-session");
-const flash = require('express-flash');
-const MongoDbStore = require('connect-mongo')(session);
+const flash = require("express-flash");
+const MongoDbStore = require("connect-mongo")(session);
+const passport = require("passport");
 
 // database connection
 const url = "mongodb+srv://KUNAL:KUNAL9900@mernapp.oaibt56.mongodb.net/pizza";
@@ -21,37 +22,47 @@ connection.once("open", (err) => {
   }
   console.log("Database Connected Successfully..");
 });
-//session store
-
-let mongoStore = new MongoDbStore({
-  mongooseConnection:connection,
-  collection:'sessions'
-})
 
 //session config
-
+let mongoStore = new MongoDbStore({
+  mongooseConnection: connection,
+  collection: "sessions",
+});
 app.use(
   session({
     secret: process.env.COOKIE_SECRET,
     resave: false,
-    store:mongoStore,
+    store: mongoStore,
     saveUninitialized: false,
 
     cookie: { maxAge: 1000 * 60 * 60 * 24 }, //24 hours
   })
 );
 
+//passport config
+const passportInit = require("./app/config/passport");
+passportInit(passport);
+app.use(passport.initialize());
+app.use(passport.session());
+//session store
+
 app.use(flash());
 
 //assets
 app.use(express.static("public"));
-app.use(express.json())
+app.use(
+  express.urlencoded({
+    extended: false,
+  })
+);
+app.use(express.json());
 //middleware
 
-app.use((req,res,next)=>{
-   res.locals.session = req.session
-   next()
-})
+app.use((req, res, next) => {
+  res.locals.session = req.session;
+  res.locals.user = req.user
+  next();
+});
 
 //setting up template engine
 

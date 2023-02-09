@@ -1,11 +1,17 @@
 const authcontroller = require('../app/http/controllers/authcontroller');
 const cartcontroller = require('../app/http/controllers/customers/cartcontroller');
 const homecontroller = require('../app/http/controllers/homecontroller')
+const guest = require('../app/http/middlewares/guest')
 
 function initRoutes(app){
       app.get("/", homecontroller().index);
-      app.get("/login",authcontroller().login);
-      app.get("/register",authcontroller().register);
+      app.get("/login",guest,authcontroller().login);
+      app.post("/login",authcontroller().postLogin);
+
+      app.get("/register",guest,authcontroller().register);
+      app.post("/register",authcontroller().postRegister);
+      app.post("/logout",authcontroller().logout);
+
       app.get("/cart",cartcontroller().index);
       app.post('/update-cart',cartcontroller().update)
 }
