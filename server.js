@@ -18,8 +18,7 @@ const connection = mongoose.connection;
 connection.once('open', () => {
     console.log('Database connected...');
 })
-    console.log('Connection failed...')
-
+   
 
 
 // Session store
@@ -90,3 +89,4 @@ eventEmitter.on('orderUpdated', (data) => {
 eventEmitter.on('orderPlaced', (data) => {
     io.to('adminRoom').emit('orderPlaced', data)
 })
+

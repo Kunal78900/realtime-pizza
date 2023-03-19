@@ -41,18 +41,29 @@ function orderController () {
                             })
 
                         }).catch((err) => {
+
                             delete req.session.cart
                             return res.json({ message : 'OrderPlaced but payment failed, You can pay at delivery time' });
                         })
                     } else {
-                        delete req.session.cart
-                        return res.json({ message : 'Order placed succesfully' });
+
+                        placedOrder.save().then((ord) => {
+                            // Emit
+                            const eventEmitter = req.app.get('eventEmitter')
+                            eventEmitter.emit('orderPlaced', ord)
+                            delete req.session.cart
+                            return res.json({ message : 'Payment successful, Order placed successfully' });
+                        }).catch((err) => {
+                            console.log(err)
+                        })
+
                     }
                 })
             }).catch(err => {
                 return res.status(500).json({ message : 'Something went wrong' });
             })
         },
+
         async index(req, res) {
             const orders = await Order.find({ customerId: req.user._id },
                 null,
